@@ -1,4 +1,3 @@
-use context starter2024
 
 include image
 include reactors
@@ -9,11 +8,10 @@ HEIGHT = 600
 
 # Game constants defining movement, speed, and collision properties
 CAR_MOVE = 10
-TRUCK_SPEED = 6
+TRUCK_SPEED = 5
 COLLISION_DISTANCE = 50
 TRUCK_MIN_DISTANCE = 70
 CAR_SIZE = 50
-OVERLAP_THRESHOLD = 10
 
 # URLs for images
 CAR_URL = "https://code.pyret.org/shared-image-contents?sharedImageId=1MWZLrq-EMOceQH-4omWIZV32B2D8K-mX"
@@ -70,7 +68,7 @@ end
 
 
 # Initialize the car and trucks
-INIT_CAR = posn(600, 300)
+INIT_CAR = posn(300, 600)
 INIT_TRUCK1 = random-truck(INIT_CAR, INIT_CAR, INIT_CAR)
 INIT_TRUCK2 = random-truck(INIT_CAR, INIT_TRUCK1, INIT_CAR)
 INIT_TRUCK3 = random-truck(INIT_CAR, INIT_TRUCK1, INIT_TRUCK2)
@@ -96,24 +94,25 @@ end
 
 # Key press handler to move the car
 fun on-key(w :: World, key :: String) -> World:
-  if (key == "up") and (w.car.y > 0):
+  if (key == "left") and (w.car.y > 0):
     world(posn(w.car.x, w.car.y - CAR_MOVE), w.truck1, w.truck2, w.truck3)
-  else if (key == "down") and (w.car.y < (HEIGHT - 50)):
+  else if (key == "right") and (w.car.y < (HEIGHT - 50)):
     world(posn(w.car.x, w.car.y + CAR_MOVE), w.truck1, w.truck2, w.truck3)
-  else if (key == "left") and (w.car.x > 0):
+  else if (key == "up") and (w.car.x > 0):
     world(posn(w.car.x - CAR_MOVE, w.car.y), w.truck1, w.truck2, w.truck3)
-  else if (key == "right") and (w.car.x < (WIDTH - 50)):
+  else if (key == "down") and (w.car.x < (WIDTH - 50)):
     world(posn(w.car.x + CAR_MOVE, w.car.y), w.truck1, w.truck2, w.truck3)
   else:
     w
   end
 end
 
-COLLISION-THRESHOLD = 70 
+# Function to check for collisions 
+COLLISION-THRESHOLD = 60 
 fun are-overlapping(car :: Posn, truck :: Posn):
   distance(car, truck) < COLLISION-THRESHOLD
 end
-# Function to check for collisions 
+
 fun check-collision(w :: World) -> Boolean:
   car-left = w.car.x
   car-right = w.car.x + CAR_SIZE
@@ -122,20 +121,21 @@ fun check-collision(w :: World) -> Boolean:
   are-overlapping(w.car, w.truck1) or are-overlapping(w.car,w.truck2) or are-overlapping(w.car,w.truck3)
 end
 
+
 # Stop the game when a collision occurs
 fun stop-when(w :: World) -> Boolean:
-  check-collision(w)
+   check-collision(w)
 end
 
 # Function to render the game scene
 fun render(w :: World) -> Image:
-  place-image(CAR, w.car.x, w.car.y,
+  place-image(CAR, w.car.y, w.car.x,
     place-image(TRUCK1, w.truck1.y, w.truck1.x,
       place-image(TRUCK2, w.truck2.y, w.truck2.x,
         place-image(TRUCK3, w.truck3.y, w.truck3.x, empty-color-scene(WIDTH, HEIGHT, 'grey')))) )
 end
 
-# Reactor definition, where we set up the game logic
+# Reactor
 anim = reactor:
   init: INIT_WORLD,
   on-tick: on-tick,
